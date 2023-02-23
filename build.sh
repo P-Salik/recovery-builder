@@ -2,24 +2,28 @@
 setup () {
 	git config --global user.name "$GH_USERNAME"
 	git config --global user.email "$GH_USERMAIL"
+	MDHS=$(date +%m%d%H%S)
 }
 
-# A function to send message(s) via Telegram's BOT api.
-tgm() {
-    curl -sX POST https://api.telegram.org/bot"${TOKEN}"/sendMessage \
-        -d chat_id="${CHATID}" \
-        -d parse_mode=Markdown \
-        -d disable_web_page_preview=true \
-        -d text="$1" &>/dev/null
+# A function to send message(s) via Telegrams BOT api.
+tgm () {
+	curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d chat_id="$CHATID" \
+		-d "disable_web_page_preview=true" \
+		-d "parse_mode=html" \
+		-d text="$1"
 }
 
-# A function to send file(s) via Telegram's BOT api.
-tgd() {
-    MD5=$(md5sum "$1" | cut -d' ' -f1)
-    curl -fsSL -X POST -F document=@"$1" https://api.telegram.org/bot"${TOKEN}"/sendDocument \
-        -F "chat_id=${CHATID}" \
-        -F "parse_mode=Markdown" \
-        -F "caption=$2 | *MD5*: \`$MD5\`"
+# A function to send file(s) via Telegrams BOT api.
+tgd () {
+	# Post MD5Checksum alongwith for easeness
+	MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
+
+	# Show the Checksum alongwith caption
+	curl --progress-bar -F document=@"$1" "https://api.telegram.org/bot$TOKEN/sendMessage" \
+		-F chat_id="$CHATID" \
+		-F "disable_web_page_preview=true" \
+		-F "parse_mode=html" \
+		-F caption="$2 | <b>MD5 Checksum : </b><code>$MD5CHECK</code>"
 }
 
 # A function to sync recovery sauce
@@ -72,8 +76,7 @@ success () {
 
 	# Post
 	tgm "Build completed successfully in $((BUILD_TIME / 60)):$((BUILD_TIME % 60))
-	Link: https://sourceforge.net/projects/recovery-ci/files/""$DEVICE""/recovery-""$CIRRUS_BUILD_ID"".zip/download
-	      < File will be available to download after a few minutes >
+	Link: https://sourceforge.net/projects/recovery-ci/files/""$DEVICE""/recovery-""$MDHS"".zip/download
 	Dev : ""$GH_USERNAME""
 	Product : Recovery
 	Device : ""$DEVICE""
@@ -92,14 +95,13 @@ check () {
 	cd $CIRRUS_WORKING_DIR/source
 	mkdir recovery
 	if [ -e $OUT_DIRECTORY/*.zip ]; then
-		echo "Found $(basename $OUT_DIRECTORY/*.zip)! Uploading!"
-		cp $OUT_DIRECTORY/*.zip recovery
-		zip -r recovery-$CIRRUS_BUILD_ID.zip recovery
+		echo "Found recovery zip! Uploading!"
+		mv $OUT_DIRECTORY/*.zip recovery-$MDHS.zip
 		success
 	elif [ $(ls $OUT_DIRECTORY/*.img | wc -l) -gt 3 ]; then
-		echo "Packing $(ls $OUT_DIRECTORY/*.img) files!"
-		cp $OUT_DIRECTORY/*.img recovery
-		zip -r recovery-$CIRRUS_BUILD_ID.zip recovery
+		echo "Found recovery image! Uploading!"
+		cp $(ls $OUT_DIRECTORY/*.img | grep -v "dtb\|ramdisk") recovery
+		zip -r recovery-$MDHS.zip recovery
 		success
 	else
 		fail
@@ -108,9 +110,8 @@ check () {
 
 # A function to call all functions one by one in order
 main () {
-	cd $CIRRUS_WORKING_DIR/source
-	setup
 	tgm "∆ [ Build Started ] ∆"
+	setup
 	sync
 	build
 	check
