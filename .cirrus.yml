@@ -6,7 +6,7 @@ env:
     DT_LINK: "https://github.com/P-Salik/android_recovery_realme_RMX1941"
     DT_PATH: "device/realme/RMX1941"
     MANIFEST: "https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git"
-    MANIFEST_BRANCH: "twrp-11"
+    MANIFEST_BRANCH: "twrp-12.1"
     GH_TOKEN: "ENCRYPTED[051a815373ace22a99f09b04219929ee702eb0907e6018be14cb94c3a52968517f4435d433ad785a3b78ff6595886a92]"
     GH_USERNAME: "P-Salik"
     GH_USEREMAIL: "peersalik16@gmail.com"
