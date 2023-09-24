@@ -11,6 +11,9 @@ export DEBIAN_FRONTEND=noninteractive
 # Update package list
 apt update
 
+# Timezone
+ln -fs /usr/share/zoneinfo/Asia/Kolkata /etc/localtime && date
+
 echo "Installing required packages"
 apt install \
     apt-utils autoconf automake axel bc bison build-essential \

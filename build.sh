@@ -2,12 +2,14 @@
 setup () {
 	git config --global user.name "$GH_USERNAME"
 	git config --global user.email "$GH_USERMAIL"
+	git config --global credential.helper store
+	echo "https://P-Salik:${GH_TOKEN}@github.com" > ~/.git-credentials
 	MDHS=$(date +%m%d%H%S)
 }
 
 # A function to send message(s) via Telegrams BOT api.
 tgm () {
-	curl -s -X POST "https://api.telegram.org/bot$TOKEN/sendMessage" -d chat_id="$CHATID" \
+	curl -s -X POST "https://api.telegram.org/bot$TG_TOKEN/sendMessage" -d chat_id="$TG_CHAT" \
 		-d "disable_web_page_preview=true" \
 		-d "parse_mode=html" \
 		-d text="$1"
@@ -19,8 +21,8 @@ tgd () {
 	MD5CHECK=$(md5sum "$1" | cut -d' ' -f1)
 
 	# Show the Checksum alongwith caption
-	curl --progress-bar -F document=@"$1" "https://api.telegram.org/bot$TOKEN/sendMessage" \
-		-F chat_id="$CHATID" \
+	curl --progress-bar -F document=@"$1" "https://api.telegram.org/bot$TG_TOKEN/sendMessage" \
+		-F chat_id="$TG_CHAT" \
 		-F "disable_web_page_preview=true" \
 		-F "parse_mode=html" \
 		-F caption="$2 | <b>MD5 Checksum : </b><code>$MD5CHECK</code>"
