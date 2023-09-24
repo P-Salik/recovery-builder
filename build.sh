@@ -44,9 +44,9 @@ build () {
 	BUILD_START=$(date +"%s")
 	cd $CIRRUS_WORKING_DIR/source
 	. build/envsetup.sh
-	lunch twrp_$DEVICE-eng
+	lunch omni_$DEVICE-eng
 	export ALLOW_MISSING_DEPENDENCIES=true
-	mka recoveryimage
+	mka pbrp
 	BUILD_END=$(date +"%s")
 	export BUILD_TIME=$((BUILD_END - BUILD_START))
  }
